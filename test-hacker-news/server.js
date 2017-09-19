@@ -12,9 +12,31 @@ const app = express();
 app.use(morgan(':method :url :res[location] :status'));
 
 app.use(bodyParser.json());
+app.post('api/stories', (req, res) => {
+  let { title, url } = req.body;
+  knex('news')
+    .insert({title: title, url: url})
+    .returning(['id', 'title', 'url'])
+    .then((story) => {
+      console.log('returning posted data', story);
+      res.status(201).json(story[0]);
+    });
+});
 
-app.get('/', (req, res) => {
-  res.send('hello world');
+app.get('/api/stories', (req, res) => {
+  let arrOfStories = [];
+  let objOfStories = {};
+  knex('news')
+    .select('news.id as id', 'title', 'url', 'votes', 'tags.name as tag', 'tags.id as tagId')
+    .innerJoin('news_tags', 'news.id', 'news_tags.id_news')
+    .innerJoin('tags', 'news_tags.id_tags', tags.id)
+    .innerJoin('author', 'news.id_author', 'author.id')
+    .orderBy('title')
+    .then((results) => {
+      results.forEach((story) => {
+        
+      })
+    });
 });
 
 // ADD YOUR ENDPOINTS HERE
